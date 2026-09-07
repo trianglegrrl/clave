@@ -1,0 +1,343 @@
+<title>Practice Tides</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@500;700;900&family=Oswald:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#faf8f4; --surface:#ffffff; --ink:#1c1a17; --ink-2:#5e5a52; --ink-3:#8a857b; --rule:#e6e1d8; --grid:#eeeae2;
+  --home:#2a78d6; --studio:#1baf7a; --accent:#b8681c;
+  --h100:#cde2fb;--h200:#9ec5f4;--h300:#6da7ec;--h400:#3987e5;--h500:#256abf;--h600:#184f95;--h700:#0d366b;
+  --tip-bg:#1c1a17; --tip-ink:#faf8f4;
+  /* Maya's world is single-theme on purpose */
+  --sea:#0b2a4a; --sea-deep:#071d36; --sand:#f3ecdc; --sand-2:#9db6c9; --coral:#ff8f7a; --shell:#123a5e;
+  --p1:#2a8f93;--p2:#3fbfbd;--p3:#6fe0d8;--p4:#a9f0ea;--p5:#e2fbf7;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#161513; --surface:#1f1d1a; --ink:#f4f0e8; --ink-2:#c3bdb1; --ink-3:#8d877c; --rule:#33302b; --grid:#2a2824;
+    --home:#3987e5; --studio:#199e70; --accent:#d9924a;
+    --h100:#1b2f4a;--h200:#1c4270;--h300:#1f558f;--h400:#2a6fb8;--h500:#3987e5;--h600:#6da7ec;--h700:#9ec5f4;
+    --tip-bg:#f4f0e8; --tip-ink:#161513;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#161513; --surface:#1f1d1a; --ink:#f4f0e8; --ink-2:#c3bdb1; --ink-3:#8d877c; --rule:#33302b; --grid:#2a2824;
+  --home:#3987e5; --studio:#199e70; --accent:#d9924a;
+  --h100:#1b2f4a;--h200:#1c4270;--h300:#1f558f;--h400:#2a6fb8;--h500:#3987e5;--h600:#6da7ec;--h700:#9ec5f4;
+  --tip-bg:#f4f0e8; --tip-ink:#161513;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5}
+button{font:inherit;cursor:pointer}
+.tabs{display:flex;gap:6px;padding:14px 20px 0;background:var(--bg)}
+.tab{border:1px solid var(--rule);border-bottom:none;background:transparent;color:var(--ink-2);padding:10px 18px;border-radius:12px 12px 0 0;font-weight:600;letter-spacing:.01em}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink)}
+.tab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel[hidden]{display:none}
+.sr{position:absolute;left:-9999px}
+
+/* ---------- Maya's Ocean ---------- */
+#maya{position:relative;background:linear-gradient(180deg,var(--sea) 0%,var(--sea-deep) 100%);color:var(--sand);font-family:Nunito,"Trebuchet MS",sans-serif;overflow:hidden;min-height:60vh}
+#maya canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#maya .inner{position:relative;max-width:980px;margin:0 auto;padding:36px 24px 56px;display:grid;gap:36px}
+.ocean-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center}
+.ocean-hero .mer{font-size:clamp(84px,14vw,150px);line-height:1;filter:drop-shadow(0 12px 22px rgba(0,0,0,.35))}
+.ocean-hero h1{font-family:Fredoka,Nunito,sans-serif;font-weight:700;font-size:clamp(30px,5vw,46px);margin:0 0 8px;text-wrap:balance;letter-spacing:.005em}
+.ocean-hero .hero-num{font-weight:900;font-size:clamp(52px,9vw,88px);line-height:1;color:var(--p4);margin:6px 0 4px}
+.ocean-hero .hero-num small{font-size:.38em;font-weight:700;color:var(--sand);margin-left:6px}
+.ocean-hero p{margin:0;color:var(--sand-2);font-size:18px;max-width:34ch}
+.shells{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.shell{background:var(--shell);border-radius:28px 28px 22px 22px;padding:18px 18px 16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.shell .n{font-weight:900;font-size:clamp(30px,5vw,44px);line-height:1.05;color:var(--sand)}
+.shell .l{font-family:Fredoka,Nunito,sans-serif;font-weight:500;color:var(--sand-2);margin-top:6px;font-size:16px}
+.shell .l b{color:var(--p4);font-weight:700}
+.sea-card{background:rgba(255,255,255,.05);border-radius:24px;padding:22px 22px 18px}
+.sea-card h2{font-family:Fredoka,Nunito,sans-serif;font-weight:700;font-size:26px;margin:0 0 4px;text-wrap:balance}
+.sea-card .sub{margin:0 0 16px;color:var(--sand-2)}
+.necklace{display:grid;grid-template-columns:70px repeat(7,minmax(0,1fr));gap:8px 6px;align-items:center}
+.necklace .wk{font-size:13px;color:var(--sand-2);font-variant-numeric:tabular-nums;text-align:right;padding-right:6px}
+.necklace .dow{font-family:Fredoka,Nunito,sans-serif;font-size:14px;color:var(--sand-2);text-align:center}
+.pearl{display:grid;place-items:center;height:34px}
+.pearl i{display:block;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0,var(--c) 38%,var(--c) 100%);box-shadow:0 0 0 2px var(--sea) ,0 0 10px 1px color-mix(in oklab,var(--c) 60%,transparent);width:var(--s);height:var(--s)}
+.pearl.empty i{background:none;box-shadow:none;border:2px dotted rgba(157,182,201,.35);width:10px;height:10px}
+.pearl.future i{visibility:hidden}
+.pearl:focus-visible{outline:2px solid var(--p4);border-radius:50%}
+.pearl-key{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin-top:16px;color:var(--sand-2);font-size:14px}
+.pearl-key span{display:inline-flex;align-items:center;gap:8px}
+.pearl-key i{display:inline-block;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0,var(--c) 38%,var(--c) 100%);width:var(--s);height:var(--s)}
+.bubbles svg{width:100%;height:auto;display:block;overflow:visible}
+.bubbles text{font-family:Nunito,sans-serif;fill:var(--sand-2);font-size:12px}
+.bubbles .cap{fill:var(--sand);font-weight:900;font-size:13px}
+.bubbles .grid{stroke:rgba(157,182,201,.18);stroke-width:1}
+.bubbles rect{fill:var(--p3)}
+.bubbles rect:hover,.bubbles rect:focus{fill:var(--p5);outline:none}
+.bubbles .best{fill:var(--p4)}
+.tablewrap{margin-top:14px}
+details summary{cursor:pointer;color:var(--sand-2);font-size:14px}
+#alaina details summary{color:var(--ink-2)}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:10px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid rgba(157,182,201,.2)}
+#alaina th,#alaina td{border-bottom:1px solid var(--rule)}
+th{font-weight:700}
+.num{text-align:right}
+.scroll{overflow-x:auto}
+
+/* ---------- Alaina ---------- */
+#alaina{background:var(--surface);border-top:1px solid var(--rule)}
+#alaina .inner{max-width:980px;margin:0 auto;padding:34px 24px 60px;display:grid;gap:32px}
+.log-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;border-bottom:1px solid var(--rule);padding-bottom:22px}
+.eyebrow{font-family:Oswald,"Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);font-weight:500}
+.log-head h1{font-family:Oswald,"Arial Narrow",sans-serif;font-weight:600;font-size:clamp(34px,5vw,54px);line-height:1;margin:6px 0 10px;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+.log-head p{margin:0;color:var(--ink-2);max-width:60ch}
+.hero-fig{text-align:right}
+.hero-fig .v{font-weight:700;font-size:clamp(48px,7vw,72px);line-height:1;letter-spacing:-.02em}
+.hero-fig .v small{font-size:.4em;font-weight:600;color:var(--ink-2);margin-left:4px}
+.hero-fig .l{color:var(--ink-3);font-size:14px;margin-top:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.kpi{padding:16px 18px;border-right:1px solid var(--rule)}
+.kpi:last-child{border-right:none}
+.kpi .l{font-size:13px;color:var(--ink-3)}
+.kpi .v{font-weight:700;font-size:28px;line-height:1.15;margin-top:4px}
+.kpi .v small{font-size:14px;font-weight:600;color:var(--ink-2);margin-left:3px}
+.kpi .d{font-size:13px;color:var(--ink-2);margin-top:2px}
+.chart h2{font-family:Oswald,"Arial Narrow",sans-serif;font-weight:500;font-size:22px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 2px}
+.chart .sub{margin:0 0 14px;color:var(--ink-2);font-size:15px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--ink-2);margin-bottom:10px}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+.weekly svg{width:100%;height:auto;display:block;overflow:visible}
+.weekly text{font-size:12px;fill:var(--ink-3)}
+.weekly .cap{fill:var(--ink);font-weight:600;font-size:12px}
+.weekly .grid{stroke:var(--grid);stroke-width:1}
+.weekly .axis{stroke:var(--rule);stroke-width:1}
+.weekly rect.home{fill:var(--home)} .weekly rect.studio{fill:var(--studio)}
+.weekly rect:hover,.weekly rect:focus{filter:brightness(1.15);outline:none}
+.heat{display:grid;grid-template-columns:auto repeat(7,minmax(0,1fr));gap:4px;align-items:center}
+.heat .wk{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding-right:8px;white-space:nowrap}
+.heat .dow{font-size:12px;color:var(--ink-3);text-align:center}
+.cell{height:22px;border-radius:4px;background:var(--c)}
+.cell.zero{background:transparent;border:1px solid var(--grid)}
+.cell.future{visibility:hidden}
+.cell:hover,.cell:focus{outline:2px solid var(--ink);outline-offset:1px}
+.heat-key{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:13px;color:var(--ink-2)}
+.heat-key i{width:22px;height:12px;border-radius:3px;display:inline-block}
+.notes{display:grid;gap:0}
+.note{display:grid;grid-template-columns:110px 64px minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid var(--rule);font-size:15px}
+.note time{color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.note .dur{font-variant-numeric:tabular-nums;color:var(--ink-2);text-align:right}
+.note .dur.st{color:var(--ink);font-weight:600}
+.note .st-tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);border:1px solid var(--rule);border-radius:4px;padding:0 6px;margin-left:8px;vertical-align:middle}
+
+/* tooltip */
+#tip{position:fixed;z-index:9;pointer-events:none;background:var(--tip-bg);color:var(--tip-ink);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:280px}
+#tip[hidden]{display:none}
+#tip b{font-size:15px}
+#tip .row{display:flex;align-items:center;gap:8px}
+#tip .k{display:inline-block;width:12px;height:3px;border-radius:2px}
+@media (max-width:640px){
+  .ocean-hero{grid-template-columns:1fr}.ocean-hero .mer{order:-1;text-align:center}
+  .shells{grid-template-columns:1fr 1fr 1fr;gap:8px}.shell{padding:12px 8px}.shell .l{font-size:13px}
+  .necklace{grid-template-columns:52px repeat(7,minmax(0,1fr));gap:6px 3px}.necklace .wk{font-size:11px}
+  .log-head{grid-template-columns:1fr}.hero-fig{text-align:left}
+  .note{grid-template-columns:96px 56px minmax(0,1fr);gap:10px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){#maya canvas{display:none}}
+</style>
+
+<div class="tabs" role="tablist" aria-label="Whose practice">
+  <button class="tab" role="tab" id="tab-maya" aria-selected="true" aria-controls="maya">Maya’s Ocean</button>
+  <button class="tab" role="tab" id="tab-alaina" aria-selected="false" aria-controls="alaina">Alaina’s Logbook</button>
+</div>
+
+<section id="maya" class="panel" role="tabpanel" aria-labelledby="tab-maya">
+  <canvas id="bubblesbg" aria-hidden="true"></canvas>
+  <div class="inner">
+    <header class="ocean-hero">
+      <div>
+        <h1>Maya, look how much you’ve practiced!</h1>
+        <div class="hero-num" id="m-hero"></div>
+        <p id="m-hero-sub"></p>
+      </div>
+      <div class="mer" aria-hidden="true">🧜‍♀️</div>
+    </header>
+
+    <div class="shells" id="m-shells"></div>
+
+    <section class="sea-card" aria-labelledby="m-neck-h">
+      <h2 id="m-neck-h">Your pearl necklace</h2>
+      <p class="sub">Every day you practice, you get a pearl. Bigger, brighter pearls mean more minutes. Touch a pearl to see its day.</p>
+      <div class="necklace" id="m-necklace"></div>
+      <div class="pearl-key" id="m-key"></div>
+      <details class="tablewrap"><summary>See the necklace as a list</summary><div class="scroll"><table id="m-table"></table></div></details>
+    </section>
+
+    <section class="sea-card bubbles" aria-labelledby="m-bub-h">
+      <h2 id="m-bub-h">Minutes each week</h2>
+      <p class="sub">Each bubble column is one week of piano. The tallest one is your best week ever!</p>
+      <div id="m-weekly"></div>
+      <details class="tablewrap"><summary>See the weeks as a list</summary><div class="scroll"><table id="m-wtable"></table></div></details>
+    </section>
+  </div>
+</section>
+
+<section id="alaina" class="panel" role="tabpanel" aria-labelledby="tab-alaina" hidden>
+  <div class="inner">
+    <header class="log-head">
+      <div>
+        <div class="eyebrow" id="a-range"></div>
+        <h1>Alaina’s practice log</h1>
+        <p>Home practice plus rehearsal-studio time at Geary Ave, as logged in MyMusicStaff. Studio sessions are counted from the booking length.</p>
+      </div>
+      <div class="hero-fig"><div class="v" id="a-hero"></div><div class="l">total logged</div></div>
+    </header>
+
+    <div class="kpis" id="a-kpis"></div>
+
+    <section class="chart weekly" aria-labelledby="a-week-h">
+      <h2 id="a-week-h">Minutes per week</h2>
+      <p class="sub">Weeks start on Sunday. Studio time is stacked on top of home practice.</p>
+      <div class="legend"><span><i style="background:var(--home)"></i>Home practice</span><span><i style="background:var(--studio)"></i>Geary Ave studio</span></div>
+      <div id="a-weekly"></div>
+      <details class="tablewrap"><summary>Show as table</summary><div class="scroll"><table id="a-wtable"></table></div></details>
+    </section>
+
+    <section class="chart" aria-labelledby="a-heat-h">
+      <h2 id="a-heat-h">Every day</h2>
+      <p class="sub">One cell per day; darker is more minutes. Hover or focus a cell for the exact time.</p>
+      <div class="heat" id="a-heat"></div>
+      <div class="heat-key" id="a-heatkey"></div>
+      <details class="tablewrap"><summary>Show as table</summary><div class="scroll"><table id="a-htable"></table></div></details>
+    </section>
+
+    <section class="chart" aria-labelledby="a-notes-h">
+      <h2 id="a-notes-h">What got worked on</h2>
+      <p class="sub" id="a-notes-sub"></p>
+      <div class="notes" id="a-notes"></div>
+    </section>
+  </div>
+</section>
+
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+const DATA = __DATA__;
+for (const k in DATA) for (const r of DATA[k]) r.notes = (r.notes||'').replace(/\s*Show More\s*$/, ' …').trim();
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, attrs={}, text) => { const e = document.createElement(tag); for (const [k,v] of Object.entries(attrs)) { if (k==='class') e.className=v; else if (k==='style') e.style.cssText=v; else e.setAttribute(k,v); } if (text!=null) e.textContent=text; return e; };
+const mins = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
+const fmtMin = m => m>=60 ? `${Math.floor(m/60)} h ${m%60 ? (m%60)+' min' : ''}`.trim() : `${m} min`;
+const fmtHM = m => `${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`;
+const isoToDate = s => new Date(s+'T12:00:00');
+const dateToIso = d => d.toISOString().slice(0,10);
+const longDate = s => isoToDate(s).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+const shortDate = s => isoToDate(s).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+const sundayOf = d => { const x = new Date(d); x.setDate(x.getDate()-x.getDay()); return x; };
+const TODAY = '__TODAY__';
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function perDay(rows){ const m = new Map(); for (const r of rows){ m.set(r.date,(m.get(r.date)||0)+mins(r.duration)); } return m; }
+function weeks(dayMap, first, last){ const out = new Map(); let d = sundayOf(isoToDate(first)); const end = isoToDate(last);
+  while (d <= end){ const wk = dateToIso(d); const days=[]; for(let i=0;i<7;i++){ const dd=new Date(d); dd.setDate(d.getDate()+i); days.push(dateToIso(dd)); }
+    out.set(wk, {start: wk, days, total: days.reduce((s,x)=>s+(dayMap.get(x)||0),0)}); d.setDate(d.getDate()+7); } return out; }
+function streaks(dayMap){ const ds=[...dayMap.keys()].sort(); let best=0,cur=0,prev=null,bestEnd=null;
+  for(const s of ds){ const d=isoToDate(s); cur = prev && (d-prev)/864e5===1 ? cur+1 : 1; if(cur>=best){best=cur;bestEnd=s;} prev=d; }
+  const last = ds[ds.length-1]; const active = (isoToDate(TODAY)-isoToDate(last))/864e5 <= 1; let run=0; if(active){ let d=isoToDate(last); while(dayMap.has(dateToIso(d))){run++; d.setDate(d.getDate()-1);} }
+  return {best, bestEnd, current: run}; }
+
+/* tooltip */
+const tip = $('#tip');
+function showTip(target, html){ tip.replaceChildren(...html); tip.hidden=false; const r=target.getBoundingClientRect(); const tw=tip.offsetWidth, th=tip.offsetHeight;
+  let x=r.left+r.width/2-tw/2, y=r.top-th-10; if(y<8) y=r.bottom+10; x=Math.max(8,Math.min(x,innerWidth-tw-8)); tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.hidden=true; }
+function tipRows(title, rows){ const out=[el('b',{},title), el('br')]; for(const [k,v,c] of rows){ const r=el('div',{class:'row'}); if(c){ r.append(el('i',{class:'k',style:`background:${c}`})); } r.append(el('span',{},v+' '), el('span',{style:'opacity:.75'},k)); out.push(r);} return out; }
+function bindTip(node, fn){ node.addEventListener('pointerenter',()=>showTip(node,fn())); node.addEventListener('pointerleave',hideTip); node.addEventListener('focus',()=>showTip(node,fn())); node.addEventListener('blur',hideTip); }
+
+/* tabs */
+for (const t of document.querySelectorAll('.tab')){ t.addEventListener('click',()=>{ for(const x of document.querySelectorAll('.tab')){ const on = x===t; x.setAttribute('aria-selected',on); document.getElementById(x.getAttribute('aria-controls')).hidden=!on; } try{localStorage.setItem('tides-tab',t.id);}catch(e){} }); }
+try{ const saved=localStorage.getItem('tides-tab'); if(saved && document.getElementById(saved)) document.getElementById(saved).click(); }catch(e){}
+
+/* ================= MAYA ================= */
+(function(){
+  const rows = DATA.maya; const day = perDay(rows); const total=[...day.values()].reduce((a,b)=>a+b,0);
+  const dates=[...day.keys()].sort(); const first=dates[0], last=dates[dates.length-1];
+  const st = streaks(day);
+  $('#m-hero').append(document.createTextNode(String(Math.floor(total/60))), el('small',{},'hours'), document.createTextNode(' '+(total%60)), el('small',{},'minutes'));
+  $('#m-hero-sub').textContent = `That’s ${total} minutes of piano since ${longDate(first)}.`;
+  const shells=[[day.size,'days of practice'],[st.current||st.best, st.current? 'days in a row right now':'days in a row (your record)'],[dates.length,'pearls collected']];
+  for(const [n,l] of shells){ const s=el('div',{class:'shell'}); s.append(el('div',{class:'n'},String(n)), el('div',{class:'l'},l)); $('#m-shells').append(s); }
+  // pearl steps (validated ordinal ramp, light = more)
+  const steps=[[1,'--p1',14,'a little (up to 10 min)'],[11,'--p2',18,'10–15 min'],[16,'--p3',22,'15–20 min'],[21,'--p4',26,'20–30 min'],[31,'--p5',30,'30 min or more']];
+  const stepFor = m => { let s=steps[0]; for(const x of steps){ if(m>=x[0]) s=x; } return s; };
+  const neck=$('#m-necklace'); neck.append(el('div')); for(const d of DOW) neck.append(el('div',{class:'dow'},d[0]));
+  const wk = weeks(day, first, last); const tbl=$('#m-table'); const thead=el('tr'); for(const h of ['Date','Day','Minutes']) thead.append(el('th',{},h)); tbl.append(thead);
+  for(const w of wk.values()){
+    neck.append(el('div',{class:'wk'}, shortDate(w.start)));
+    for(const dIso of w.days){ const m=day.get(dIso)||0; const future = dIso>TODAY; const p=el('div',{class:'pearl'+(m?'':' empty')+(future?' future':''),tabindex: m?'0':'-1'});
+      if(m){ const s=stepFor(m); p.style.setProperty('--c',`var(${s[1]})`); p.style.setProperty('--s',s[2]+'px'); }
+      p.append(el('i')); p.setAttribute('aria-label', `${longDate(dIso)}: ${m?m+' minutes':'no practice'}`);
+      bindTip(p,()=>tipRows(longDate(dIso), [[ 'minutes of piano', m? String(m):'0']])); neck.append(p);
+      if(m){ const tr=el('tr'); tr.append(el('td',{},dIso), el('td',{},DOW[isoToDate(dIso).getDay()]), el('td',{class:'num'},String(m))); tbl.append(tr); }
+    }
+  }
+  for(const s of steps){ const k=el('span'); const i=el('i'); i.style.setProperty('--c',`var(${s[1]})`); i.style.setProperty('--s',s[2]+'px'); k.append(i, document.createTextNode(s[3])); $('#m-key').append(k); }
+  // weekly bubbles
+  const W=[...wk.values()]; const max=Math.max(...W.map(w=>w.total)); const bestI=W.findIndex(w=>w.total===max);
+  const vw=920, vh=260, padL=44, padR=12, padT=26, padB=40; const plotW=vw-padL-padR, plotH=vh-padT-padB; const slot=plotW/W.length; const bw=Math.min(24,slot*.6);
+  const yMax=Math.ceil(max/30)*30; const y=v=>padT+plotH-(v/yMax)*plotH;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox',`0 0 ${vw} ${vh}`); svg.setAttribute('role','img'); svg.setAttribute('aria-label','Minutes of piano practice per week');
+  const NS='http://www.w3.org/2000/svg'; const mk=(t,a)=>{const e=document.createElementNS(NS,t); for(const [k,v] of Object.entries(a)) e.setAttribute(k,v); return e;};
+  for(let v=0; v<=yMax; v+=30){ svg.append(mk('line',{class:'grid',x1:padL,x2:vw-padR,y1:y(v),y2:y(v)})); const t=mk('text',{x:padL-8,y:y(v)+4,'text-anchor':'end'}); t.textContent=v; svg.append(t); }
+  W.forEach((w,i)=>{ if(!w.total) return; const x=padL+slot*i+(slot-bw)/2; const h=Math.max(0,y(0)-y(w.total)); const r=mk('rect',{x,y:y(w.total),width:bw,height:h,rx:Math.min(4,bw/2),tabindex:'0',class:i===bestI?'best':''});
+    r.setAttribute('aria-label',`Week of ${shortDate(w.start)}: ${w.total} minutes`); bindTip(r,()=>tipRows('Week of '+shortDate(w.start),[['minutes',String(w.total)]])); svg.append(r);
+    if(i===bestI){ const c=mk('text',{class:'cap',x:x+bw/2,y:y(w.total)-8,'text-anchor':'middle'}); c.textContent=w.total+' min ⭐'; svg.append(c); }
+    if(i%3===0||i===W.length-1){ const t=mk('text',{x:x+bw/2,y:vh-padB+18,'text-anchor':'middle'}); t.textContent=shortDate(w.start); svg.append(t); } });
+  svg.append(mk('line',{class:'grid',x1:padL,x2:vw-padR,y1:y(0),y2:y(0)}));
+  $('#m-weekly').append(svg);
+  const wt=$('#m-wtable'); const h2=el('tr'); for(const h of ['Week of','Minutes']) h2.append(el('th',{},h)); wt.append(h2); for(const w of W){ const tr=el('tr'); tr.append(el('td',{},w.start), el('td',{class:'num'},String(w.total))); wt.append(tr); }
+  // ambient bubbles (canvas)
+  const cv=$('#bubblesbg'); const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches; if(!reduce){ const ctx=cv.getContext('2d'); let bs=[]; const size=()=>{cv.width=cv.offsetWidth*devicePixelRatio; cv.height=cv.offsetHeight*devicePixelRatio; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); bs=Array.from({length:36},()=>({x:Math.random()*cv.offsetWidth,y:Math.random()*cv.offsetHeight,r:2+Math.random()*7,v:.15+Math.random()*.4,w:Math.random()*6.28}));}; size(); addEventListener('resize',size);
+    (function frame(){ const Wd=cv.offsetWidth,Hd=cv.offsetHeight; ctx.clearRect(0,0,Wd,Hd); for(const b of bs){ b.y-=b.v; b.w+=.01; if(b.y<-10){b.y=Hd+10;b.x=Math.random()*Wd;} const x=b.x+Math.sin(b.w)*6; ctx.beginPath(); ctx.arc(x,b.y,b.r,0,6.28); ctx.strokeStyle='rgba(169,240,234,.35)'; ctx.lineWidth=1.2; ctx.stroke(); ctx.beginPath(); ctx.arc(x-b.r*.3,b.y-b.r*.3,b.r*.25,0,6.28); ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fill(); } requestAnimationFrame(frame); })(); }
+})();
+
+/* ================= ALAINA ================= */
+(function(){
+  const rows = DATA.alaina; const isStudio = r => /geary|rehearsal|studio/i.test(r.notes||'');
+  const day=perDay(rows); const dates=[...day.keys()].sort(); const first=dates[0], last=dates[dates.length-1];
+  const total=[...day.values()].reduce((a,b)=>a+b,0); const studioMin=rows.filter(isStudio).reduce((s,r)=>s+mins(r.duration),0);
+  const st=streaks(day); const longest=rows.reduce((a,r)=>Math.max(a,mins(r.duration)),0);
+  $('#a-range').textContent = `${longDate(first)} – ${longDate(last)}, ${last.slice(0,4)}`;
+  $('#a-hero').append(document.createTextNode(String(Math.floor(total/60))), el('small',{},'h'), document.createTextNode(' '+String(total%60).padStart(2,'0')), el('small',{},'min'));
+  const kp=[['Days practiced',String(day.size),'',`of ${Math.round((isoToDate(last)-isoToDate(first))/864e5)+1} days in range`],['Current streak',String(st.current),'days',st.current===st.best?'also the record':`record ${st.best}`],['Average per day',String(Math.round(total/day.size)),'min','on days practiced'],['Studio time',fmtHM(studioMin),'h',`${Math.round(100*studioMin/total)}% of total, ${rows.filter(isStudio).length} bookings`],['Longest session',fmtHM(longest),'h','']];
+  for(const [l,v,u,d] of kp){ const k=el('div',{class:'kpi'}); const vv=el('div',{class:'v'},v); if(u) vv.append(el('small',{},u)); k.append(el('div',{class:'l'},l), vv); if(d) k.append(el('div',{class:'d'},d)); $('#a-kpis').append(k); }
+  // weekly stacked
+  const wk=weeks(day,first,last); const W=[...wk.values()].map(w=>{ const home=rows.filter(r=>w.days.includes(r.date)&&!isStudio(r)).reduce((s,r)=>s+mins(r.duration),0); const studio=w.total-home; return {...w,home,studio}; });
+  const max=Math.max(...W.map(w=>w.total)); const yMax=Math.ceil(max/120)*120;
+  const vw=920,vh=280,padL=48,padR=12,padT=28,padB=40,plotW=vw-padL-padR,plotH=vh-padT-padB,slot=plotW/W.length,bw=Math.min(24,slot*.6); const y=v=>padT+plotH-(v/yMax)*plotH;
+  const NS='http://www.w3.org/2000/svg'; const mk=(t,a)=>{const e=document.createElementNS(NS,t); for(const [k,v] of Object.entries(a)) e.setAttribute(k,v); return e;};
+  const svg=mk('svg',{viewBox:`0 0 ${vw} ${vh}`,role:'img','aria-label':'Minutes per week, home practice and studio time'});
+  for(let v=0; v<=yMax; v+=120){ svg.append(mk('line',{class:'grid',x1:padL,x2:vw-padR,y1:y(v),y2:y(v)})); const t=mk('text',{x:padL-8,y:y(v)+4,'text-anchor':'end'}); t.textContent=v.toLocaleString(); svg.append(t); }
+  const bestI=W.findIndex(w=>w.total===max);
+  const homeC=getComputedStyle(document.documentElement).getPropertyValue('--home').trim(), studioC=getComputedStyle(document.documentElement).getPropertyValue('--studio').trim();
+  W.forEach((w,i)=>{ const x=padL+slot*i+(slot-bw)/2; const tipFn=()=>tipRows('Week of '+shortDate(w.start),[['total',String(w.total)],['home',String(w.home),'var(--home)'],['studio',String(w.studio),'var(--studio)']]);
+    if(w.home){ const r=mk('rect',{class:'home',x,y:y(w.home),width:bw,height:y(0)-y(w.home),rx:w.studio?0:4,tabindex:'0'}); r.setAttribute('aria-label',`Week of ${shortDate(w.start)}: ${w.home} home minutes`); bindTip(r,tipFn); svg.append(r); }
+    if(w.studio){ const top=y(w.total), bottom=y(w.home)-2; const r=mk('rect',{class:'studio',x,y:top,width:bw,height:Math.max(0,bottom-top),rx:4,tabindex:'0'}); r.setAttribute('aria-label',`Week of ${shortDate(w.start)}: ${w.studio} studio minutes`); bindTip(r,tipFn); svg.append(r); }
+    if(i===bestI){ const c=mk('text',{class:'cap',x:x+bw/2,y:y(w.total)-8,'text-anchor':'middle'}); c.textContent=w.total.toLocaleString()+' min'; svg.append(c); }
+    if(i%2===0||i===W.length-1){ const t=mk('text',{x:x+bw/2,y:vh-padB+18,'text-anchor':'middle'}); t.textContent=shortDate(w.start); svg.append(t); } });
+  svg.append(mk('line',{class:'axis',x1:padL,x2:vw-padR,y1:y(0),y2:y(0)}));
+  $('#a-weekly').append(svg);
+  const wt=$('#a-wtable'); const h=el('tr'); for(const x of ['Week of','Home','Studio','Total']) h.append(el('th',{class:x==='Week of'?'':'num'},x)); wt.append(h); for(const w of W){ const tr=el('tr'); tr.append(el('td',{},w.start), el('td',{class:'num'},String(w.home)), el('td',{class:'num'},String(w.studio)), el('td',{class:'num'},String(w.total))); wt.append(tr); }
+  // heatmap (sequential blue ramp; 7 steps)
+  const ramp=['--h100','--h200','--h300','--h400','--h500','--h600','--h700']; const cuts=[1,20,30,45,60,120,180];
+  const stepFor=m=>{ let i=0; cuts.forEach((c,j)=>{ if(m>=c) i=j; }); return ramp[i]; };
+  const heat=$('#a-heat'); heat.append(el('div')); for(const d of DOW) heat.append(el('div',{class:'dow'},d));
+  const ht=$('#a-htable'); const hh=el('tr'); for(const x of ['Date','Day','Minutes','Notes']) hh.append(el('th',{class:x==='Minutes'?'num':''},x)); ht.append(hh);
+  for(const w of wk.values()){ heat.append(el('div',{class:'wk'},shortDate(w.start))); for(const dIso of w.days){ const m=day.get(dIso)||0; const c=el('div',{class:'cell'+(m?'':' zero')+(dIso>TODAY?' future':''),tabindex:m?'0':'-1'}); if(m) c.style.setProperty('--c',`var(${stepFor(m)})`); c.setAttribute('aria-label',`${longDate(dIso)}: ${m} minutes`);
+      bindTip(c,()=>{ const rs=rows.filter(r=>r.date===dIso); return tipRows(longDate(dIso), rs.length? rs.map(r=>[r.notes? (isStudio(r)?'studio · ':'')+r.notes : (isStudio(r)?'studio':'practice'), r.duration]) : [['no practice','']]); }); heat.append(c);
+      for(const r of rows.filter(r=>r.date===dIso)){ const tr=el('tr'); tr.append(el('td',{},dIso), el('td',{},DOW[isoToDate(dIso).getDay()]), el('td',{class:'num'},String(mins(r.duration))), el('td',{},r.notes||'')); ht.append(tr); } } }
+  const key=$('#a-heatkey'); key.append(el('span',{},'fewer')); ramp.forEach(r=>key.append(el('i',{style:`background:var(${r})`}))); key.append(el('span',{},'more (3 h+)'));
+  // notes
+  const noted=rows.filter(r=>r.notes).sort((a,b)=>a.date<b.date?1:-1); $('#a-notes-sub').textContent=`${noted.length} of ${rows.length} sessions have notes, newest first.`;
+  for(const r of noted){ const n=el('div',{class:'note'}); const t=el('time',{datetime:r.date},shortDate(r.date)); const d=el('div',{class:'dur'+(isStudio(r)?' st':'')},r.duration); const txt=el('div',{},r.notes); if(isStudio(r)) txt.append(el('span',{class:'st-tag'},'studio')); n.append(t,d,txt); $('#a-notes').append(n); }
+})();
+</script>
