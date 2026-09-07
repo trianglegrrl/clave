@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Drop an event for the clave hub. Anything on this Mac (launchd, Home Assistant over SSH,
+# an iPhone Shortcut, a Gmail filter script) can call this; the hub's polling loop picks it up.
+# Usage: clave-send [--type TYPE] [--source SOURCE] "free text instruction"
+#        echo "text" | clave-send --type practice.log
+set -euo pipefail
+TYPE="message"; SOURCE="${USER:-cli}"; TEXT=""
+while [[ $# -gt 0 ]]; do case "$1" in
+  --type) TYPE="$2"; shift 2;; --source) SOURCE="$2"; shift 2;; *) TEXT="${TEXT:+$TEXT }$1"; shift;; esac; done
+[[ -n "$TEXT" ]] || TEXT="$(cat)"
+[[ -n "$TEXT" ]] || { echo "clave-send: no event text" >&2; exit 1; }
+DIR="${CLAVE_HOME:-$HOME/clave}/events/pending"; mkdir -p "$DIR"
+TS="$(date +%Y%m%dT%H%M%S)"; ID="$TS-$(printf '%04x' $RANDOM)"
+TMP="$DIR/.$ID.tmp"
+printf -- '---\nid: %s\ntype: %s\nsource: %s\nreceived: %s\n---\n%s\n' "$ID" "$TYPE" "$SOURCE" "$(date -Iseconds)" "$TEXT" > "$TMP"
+mv "$TMP" "$DIR/$ID.md"      # rename is atomic, so the loop never reads a half-written file
+echo "$DIR/$ID.md"

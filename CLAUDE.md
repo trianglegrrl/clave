@@ -1,7 +1,11 @@
-# claw — Alaina's always-on assistant hub
+# clave — Alaina's always-on assistant hub
 
-You are the hub. Messages arrive here from Remote Control (phone or web), from channels,
-and from scheduled loops. Route each request to a skill, do the work, and reply briefly.
+You are the hub. Instructions arrive two ways: as messages (Remote Control from the phone
+or web, or a chat channel) and as events (files in `events/pending/`, drained by the loop in
+`LOOP.md`). Either way: route to a skill, do the work, reply briefly.
+
+Skills are not part of clave. They are ordinary Claude Code skills installed globally, and
+clave only knows the routing table below. To register a skill, add a row; nothing else.
 
 ## Routing
 
@@ -28,14 +32,19 @@ and from scheduled loops. Route each request to a skill, do the work, and reply 
 - **Replies are read on a phone.** Lead with the result, no headers, no code unless asked.
 - If a script exits with `OTP_REQUIRED`, fetch the code from Gmail as the skill describes. If it exits with `LOGIN_NEEDS_HUMAN`, say so and stop; the visible-browser login needs Alaina at the Mac.
 
-## Scheduled work
+## Events and schedules
 
-- Nightly around 23:30: rebuild and republish the practice dashboard (see Routing).
-- Set these up with `/loop` or a cron inside this session after starting; they are session-scoped.
+- `bin/clave-send "text"` drops an event; `LOOP.md` is the polling loop that drains them.
+  Start it once per session: `/loop 5m read LOOP.md and process the event inbox`.
+- Schedules are events too. Nightly dashboard rebuild: a launchd job runs
+  `clave-send --type schedule.dashboard "rebuild the practice dashboard"` at 23:30.
+- Event files are the audit trail: `events/done/` and `events/failed/` keep every one.
 
 ## Layout
 
-- `bin/claw-start` — start or reattach the hub (tmux + caffeinate + Remote Control).
+- `bin/clave-start` — start or reattach the hub (tmux + caffeinate + Remote Control).
+- `bin/clave-send` — drop an event for the loop; `LOOP.md` — what the loop does each tick.
+- `events/` — `pending/` (unclaimed), `done/`, `failed/`.
 - `dashboards/` — one folder per dashboard: `template.html`, `build.sh`, generated output (gitignored).
 - `inbox/` — drop files here for the hub to act on (screenshots, CSVs); mention the filename in your message.
 - `state/` — small durable notes the hub keeps between restarts. Prefer memory files for facts about people.

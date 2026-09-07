@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Start (or reattach to) the claw hub: a Claude Code session in ~/claw with Remote Control,
+# Start (or reattach to) the clave hub: a Claude Code session in ~/clave with Remote Control,
 # kept alive in tmux and with the Mac held awake. Run from any terminal.
 set -euo pipefail
-SESSION=claw
+SESSION=clave
 if tmux has-session -t "$SESSION" 2>/dev/null; then
-  echo "claw is already running; attaching (detach with Ctrl-b d)"; exec tmux attach -t "$SESSION"
+  echo "clave is already running; attaching (detach with Ctrl-b d)"; exec tmux attach -t "$SESSION"
 fi
-cd "$HOME/claw"
+cd "$HOME/clave"
 exec tmux new -s "$SESSION" "caffeinate -dims claude --remote-control"
