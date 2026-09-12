@@ -11,8 +11,8 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 
 | Request looks like | Do this |
 |---|---|
-| Log, edit, or delete practice time; "what did the teacher say"; upcoming lessons; anything MyMusicStaff, Maya's piano, my drums | Load the `mymusicstaff` skill and run its scripts. Never drive the portal by hand. |
-| Refresh or fix the practice dashboard (`schedule.dashboard` events too) | Run `dashboards/practice-tides/build.sh` (takes 2-3 min; it pulls both practice logs). Then republish with the Artifact tool: first `action: read` on the dashboard URL below (required before a session can publish to an artifact it did not create), then `publish` with `file_path: dashboards/practice-tides/practice-tides.html` and `url` set to that URL. Do not create a new artifact. Report the row counts from build.sh. |
+| Log, edit, or delete practice time; "what did the teacher say"; upcoming lessons; anything MyMusicStaff, Maya's piano, my drums | Load the `mymusicstaff` skill and run its scripts. Never drive the portal by hand. **After any write** (add, edit, delete, bulk) rebuild the dashboard per the row below. Reads (lessons, notes, practice list) change nothing, so they do not trigger a rebuild. Several writes in one go (a bulk backfill, or a few entries in a row) get one rebuild after the last one, not one each. |
+| Refresh or fix the practice dashboard (after an MMS write, or a `schedule.dashboard` event) | Run `dashboards/practice-tides/build.sh` (takes 2-3 min; it pulls both practice logs). Then republish with the Artifact tool: first `action: read` on the dashboard URL below (required before a session can publish to an artifact it did not create), then `publish` with `file_path: dashboards/practice-tides/practice-tides.html` and `url` set to that URL. Do not create a new artifact. Report the row counts from build.sh. |
 | Home Assistant (lights, locks, climate, scenes) | Not wired yet. Say so; do not improvise browser automation. Planned: `home-assistant` skill over the HA REST API with a token in `~/.config/homeassistant/`. |
 | Anything else | Answer directly if it is a question. For new capabilities, propose a skill rather than a one-off script. |
 
@@ -30,6 +30,7 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 - **One MyMusicStaff operation at a time.** The scripts hold a lock; do not try to parallelize them. Use the bulk script for many rows.
 - **Delegate long work to a subagent** so the hub stays responsive to the next message. Report back in one or two sentences.
 - **Replies are read on a phone.** Lead with the result, no headers, no code unless asked.
+- **Answer first, rebuild second.** After an MMS write, reply with the logged result straight away, then run the dashboard rebuild. Do not make her wait 2-3 minutes for a confirmation. Mention the rebuild only if it fails, or if she asked about the dashboard.
 - When work came in as an event (not a chat message), report the result with `bin/clave-notify`, since nobody is watching the terminal.
 - If a script exits with `OTP_REQUIRED`, fetch the code from Gmail as the skill describes. If it exits with `LOGIN_NEEDS_HUMAN`, say so and stop; the visible-browser login needs Alaina at the Mac.
 
@@ -37,8 +38,9 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 
 - `bin/clave-send "text"` drops an event; `LOOP.md` is the polling loop that drains them.
   Start it once per session: `/loop 5m read LOOP.md and process the event inbox`.
-- Schedules are events too. Nightly dashboard rebuild: a cron job on razorback runs
-  `clave-send --type schedule.dashboard "rebuild the practice dashboard"` at 23:30 (`crontab -l`).
+- Schedules are events too, but there is no nightly dashboard rebuild any more: the dashboard
+  is rebuilt right after each MyMusicStaff write, so it is never more than one edit stale.
+  `clave-send --type schedule.dashboard "rebuild the practice dashboard"` still forces one by hand.
 - Event files are the audit trail: `events/done/` and `events/failed/` keep every one.
 
 ## Layout
