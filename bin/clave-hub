@@ -22,6 +22,10 @@ CHANNELS=""
 if tmux has-session -t "$SESSION" 2>/dev/null; then
   log "stale session found; killing it"; tmux kill-session -t "$SESSION" || true; sleep 2
 fi
+# A killed hub can leave its Telegram poller behind; two pollers on one bot steal each other's messages.
+if pgrep -u "$USER" -f "claude-plugins-official/telegram" >/dev/null; then
+  log "killing orphaned Telegram channel process(es)"; pkill -u "$USER" -f "claude-plugins-official/telegram" || true; sleep 1
+fi
 
 cd "$CLAVE_HOME"
 tmux new -d -s "$SESSION" -x 200 -y 50 "claude --remote-control $CHANNELS"
