@@ -12,7 +12,7 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 | Request looks like | Do this |
 |---|---|
 | Log, edit, or delete practice time; "what did the teacher say"; upcoming lessons; anything MyMusicStaff, Maya's piano, my drums | Load the `mymusicstaff` skill and run its scripts. Never drive the portal by hand. |
-| Refresh or fix the practice dashboard | Run `dashboards/practice-tides/build.sh`, then republish `dashboards/practice-tides/practice-tides.html` with the Artifact tool using the URL below. |
+| Refresh or fix the practice dashboard (`schedule.dashboard` events too) | Run `dashboards/practice-tides/build.sh` (takes 2-3 min; it pulls both practice logs). Then republish with the Artifact tool: first `action: read` on the dashboard URL below (required before a session can publish to an artifact it did not create), then `publish` with `file_path: dashboards/practice-tides/practice-tides.html` and `url` set to that URL. Do not create a new artifact. Report the row counts from build.sh. |
 | Home Assistant (lights, locks, climate, scenes) | Not wired yet. Say so; do not improvise browser automation. Planned: `home-assistant` skill over the HA REST API with a token in `~/.config/homeassistant/`. |
 | Anything else | Answer directly if it is a question. For new capabilities, propose a skill rather than a one-off script. |
 
@@ -37,8 +37,8 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 
 - `bin/clave-send "text"` drops an event; `LOOP.md` is the polling loop that drains them.
   Start it once per session: `/loop 5m read LOOP.md and process the event inbox`.
-- Schedules are events too. Nightly dashboard rebuild: a launchd job runs
-  `clave-send --type schedule.dashboard "rebuild the practice dashboard"` at 23:30.
+- Schedules are events too. Nightly dashboard rebuild: a cron job on razorback runs
+  `clave-send --type schedule.dashboard "rebuild the practice dashboard"` at 23:30 (`crontab -l`).
 - Event files are the audit trail: `events/done/` and `events/failed/` keep every one.
 
 ## Layout
