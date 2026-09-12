@@ -28,11 +28,23 @@ tmux new -d -s "$SESSION" -x 200 -y 50 "claude --remote-control $CHANNELS"
 log "started tmux session $SESSION"
 
 pane() { tmux capture-pane -p -t "$SESSION" -S -60 2>/dev/null || true; }
-hub_pid() { pgrep -u "$USER" -f "claude --remote-control" | head -1; }
+pane_pid() { tmux list-panes -t "$SESSION" -F '#{pane_pid}' 2>/dev/null | head -1; }
+descends_from() {  # descends_from <pid> <ancestor>: is <ancestor> somewhere up <pid>'s parent chain?
+  local p=$1 anc=$2
+  while [[ -n "$p" && "$p" -gt 1 ]]; do
+    [[ "$p" == "$anc" ]] && return 0
+    p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')
+  done
+  return 1
+}
 channel_alive() {
-  local pid; pid=$(hub_pid) || return 1
   [[ -z "$CHANNELS" ]] && return 0                       # no channel configured: nothing to watch
-  pgrep -P "$pid" -f "telegram" >/dev/null 2>&1
+  local root p; root=$(pane_pid) || return 1
+  [[ -n "$root" ]] || return 1
+  for p in $(pgrep -u "$USER" -f "claude-plugins-official/telegram"); do
+    descends_from "$p" "$root" && return 0
+  done
+  return 1
 }
 
 # Wait for the session to be ready, then enter the polling loop.
