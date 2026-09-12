@@ -29,6 +29,17 @@ for the clave--the rhythm everything else in the band locks to--because that's t
 
 The Mac has to stay awake (that's the `caffeinate`). Locked is fine.
 
+On an always-on Linux box, install it as a user service instead so it survives reboots and restarts itself
+if Claude or the Telegram channel dies (lingering must be on: `loginctl enable-linger $USER`):
+
+```
+mkdir -p ~/.config/systemd/user && ln -sf ~/clave/systemd/clave.service ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now clave
+tmux attach -t clave   # watch it; Ctrl-b d to detach
+```
+
+The service enters the loop by itself after each (re)start.
+
 ## Caveats
 
 This is a personal setup, not a product. The event loop is a polling loop on purpose--it's

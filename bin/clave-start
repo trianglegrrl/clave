@@ -5,6 +5,13 @@ set -euo pipefail
 SESSION=clave
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 command -v claude >/dev/null || { echo "claude not found on PATH (install: curl -fsSL https://claude.ai/install.sh | bash)" >&2; exit 1; }
+# On Linux the hub is a systemd user service (systemd/clave.service) that restarts itself; just make sure it is up.
+if [[ "$(uname)" == "Linux" ]] && systemctl --user list-unit-files clave.service >/dev/null 2>&1; then
+  systemctl --user start clave.service
+  echo "clave runs under systemd (status: systemctl --user status clave); attaching (detach with Ctrl-b d)"
+  for _ in $(seq 1 30); do tmux has-session -t "$SESSION" 2>/dev/null && break; sleep 2; done
+  exec tmux attach -t "$SESSION"
+fi
 if tmux has-session -t "$SESSION" 2>/dev/null; then
   echo "clave is already running; attaching (detach with Ctrl-b d)"; exec tmux attach -t "$SESSION"
 fi

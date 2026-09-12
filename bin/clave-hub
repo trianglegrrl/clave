@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Foreground supervisor for the clave hub, meant to run under systemd (see systemd/clave.service).
+# Starts Claude Code in a tmux session, enters the inbox loop once the session is ready, then
+# watches it: if the session dies, or the Telegram channel subprocess disappears, exit so
+# systemd restarts everything. Attach any time with: tmux attach -t clave
+set -euo pipefail
+SESSION=clave
+CLAVE_HOME="${CLAVE_HOME:-$HOME/clave}"
+LOOP_PROMPT="/loop 5m read LOOP.md and process the event inbox"
+READY_TIMEOUT=120      # seconds to wait for Remote Control to come up
+CHANNEL_GRACE=3        # consecutive checks without the Telegram process before restarting
+CHECK_EVERY=30         # seconds between health checks
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+
+log() { printf '%s clave-hub: %s\n' "$(date '+%F %T')" "$*"; }
+command -v claude >/dev/null || { log "claude not found on PATH"; exit 1; }
+command -v tmux >/dev/null || { log "tmux not found"; exit 1; }
+
+CHANNELS=""
+[[ -f "$HOME/.claude/channels/telegram/.env" ]] && CHANNELS="--channels plugin:telegram@claude-plugins-official"
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  log "stale session found; killing it"; tmux kill-session -t "$SESSION" || true; sleep 2
+fi
+
+cd "$CLAVE_HOME"
+tmux new -d -s "$SESSION" -x 200 -y 50 "claude --remote-control $CHANNELS"
+log "started tmux session $SESSION"
+
+pane() { tmux capture-pane -p -t "$SESSION" -S -60 2>/dev/null || true; }
+hub_pid() { pgrep -u "$USER" -f "claude --remote-control" | head -1; }
+channel_alive() {
+  local pid; pid=$(hub_pid) || return 1
+  [[ -z "$CHANNELS" ]] && return 0                       # no channel configured: nothing to watch
+  pgrep -P "$pid" -f "telegram" >/dev/null 2>&1
+}
+
+# Wait for the session to be ready, then enter the polling loop.
+deadline=$(( $(date +%s) + READY_TIMEOUT ))
+until pane | grep -q "remote-control is active"; do
+  if ! tmux has-session -t "$SESSION" 2>/dev/null; then log "session died during startup"; exit 1; fi
+  if (( $(date +%s) > deadline )); then log "Remote Control not ready after ${READY_TIMEOUT}s; restarting"; tmux kill-session -t "$SESSION" || true; exit 1; fi
+  sleep 3
+done
+sleep 5
+tmux send-keys -t "$SESSION" "$LOOP_PROMPT" Enter
+log "ready; loop prompt sent"
+
+# Supervise.
+missing=0
+while sleep "$CHECK_EVERY"; do
+  if ! tmux has-session -t "$SESSION" 2>/dev/null; then log "session gone; exiting for restart"; exit 1; fi
+  if channel_alive; then
+    missing=0
+  else
+    missing=$((missing + 1)); log "Telegram channel process missing ($missing/$CHANNEL_GRACE)"
+    if (( missing >= CHANNEL_GRACE )); then
+      log "channel stayed dead; restarting hub"; tmux kill-session -t "$SESSION" || true; exit 1
+    fi
+  fi
+done

@@ -46,7 +46,8 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 
 ## Layout
 
-- `bin/clave-start` — start or reattach the hub (tmux + caffeinate + Remote Control).
+- `bin/clave-start` — start or reattach the hub (tmux + caffeinate + Remote Control). On razorback it just starts the systemd service.
+- `bin/clave-hub` + `systemd/clave.service` — supervisor used on razorback: starts the hub, enters the loop, restarts the whole thing if the session or the Telegram channel process dies (`systemctl --user status clave`, `journalctl --user -u clave`).
 - `bin/clave-send` — drop an event for the loop; `LOOP.md` — what the loop does each tick.
 - `bin/clave-notify "text"` — send Alaina a Telegram message. Use it for results of events and for anything she should see without asking (a failed login, a finished backfill). Keep it to a sentence or two.
 - `events/` — `pending/` (unclaimed), `done/`, `failed/`.
