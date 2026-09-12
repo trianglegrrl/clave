@@ -26,7 +26,8 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
   "I hate Studio 7", "Maya's recital is Oct 4"), save it in the same turn with
   `bin/clave-remember --name <slug> --type user|preference|fact|project|reference "<the fact>"`, then carry on.
   Re-use the name to update a fact instead of adding a second file; delete files that turn out wrong.
-  Do not announce every save; a short "noted" is plenty when it is the point of her message.
+  Do not announce every save; a short "noted" is plenty when it is the point of her message, plus one
+  line offering the obvious next step if there is one.
 - **What not to store:** credentials (the tool refuses them), anything the code or git already records,
   one-off chit-chat. Facts, not transcripts.
 - Memory is part of this repo, so commit it with the events you archive (`git add memory events && git commit`).
@@ -38,8 +39,9 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
   and WebFetch tools, and cite where it came from in a few words. Use `sonar-reasoning-pro` when the
   question needs judgement, `sonar-deep-research` only when she asks for a proper dig.
 - **Double-check before you send.** Re-run a query or fetch the source page when a result is surprising,
-  when two sources disagree, or when she will act on the answer (book, buy, drive somewhere). If you could
-  not verify something, say so in the reply rather than rounding it up to certainty.
+  when two sources disagree, or when she will act on the answer (book, buy, drive somewhere). Verified means
+  two independent sources agree, or the primary source (the vendor, the venue, the official page) says it.
+  If you could not verify something, say so in the reply rather than rounding it up to certainty.
 - Your own work counts too: after a script writes something (a practice entry, a booking, a calendar event),
   read it back the way the skill describes before reporting it as done.
 
@@ -50,7 +52,7 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
 | Log, edit, or delete practice time; "what did the teacher say"; upcoming lessons; anything MyMusicStaff, Maya's piano, my drums | Load the `mymusicstaff` skill and run its scripts. Never drive the portal by hand. **After any write** (add, edit, delete, bulk) rebuild the dashboard per the row below. Reads (lessons, notes, practice list) change nothing, so they do not trigger a rebuild. Several writes in one go (a bulk backfill, or a few entries in a row) get one rebuild after the last one, not one each. |
 | Refresh or fix the practice dashboard (after an MMS write, or a `schedule.dashboard` event) | Run `dashboards/practice-tides/build.sh` (takes 2-3 min; it pulls both practice logs). Then republish with the Artifact tool: first `action: read` on the dashboard URL below (required before a session can publish to an artifact it did not create), then `publish` with `file_path: dashboards/practice-tides/practice-tides.html` and `url` set to that URL. Do not create a new artifact. Report the row counts from build.sh. |
 | Smart home: lights, thermostat, locks, cameras, speakers, "is the door locked", "turn on", "set the heat" | Load the `home-assistant` skill and run its scripts. Read state before changing anything physical; never unlock a door from a scheduled event. |
-| Rehearsal room at Geary Ave: "is 3h free Saturday", "anything Tuesday evening", "book Studio 11 at 2", which rooms are free, what gear a room has | Load the `geary-ave` skill and run `geary.py`. Availability takes a second, so answer in the same reply. If hours or day are missing from the question, ask one short question and wait for the answer instead of guessing. Book only a slot Alaina named; run the dry run, then `--confirm`, and send her the payment link right away because it expires. After a confirmed booking, create a Google Calendar event with the connected calendar tool using the script's `CALENDAR:` start/end (timezone America/Toronto), never the site's calendar link, which lands 4h early. |
+| Rehearsal room at Geary Ave: "is 3h free Saturday", "anything Tuesday evening", "book Studio 11 at 2", which rooms are free, what gear a room has | Load the `geary-ave` skill and run `geary.py`. Availability takes a second, so answer in the same reply. If hours or day are missing from the question, ask one short question and wait for the answer instead of guessing. A date or weekend with no room, time, or length is not a booking request: save what she said to memory, offer to check availability, and stop. Book only a slot Alaina named; run the dry run, then `--confirm`, and send her the payment link right away because it expires. After a confirmed booking, create a Google Calendar event with the connected calendar tool using the script's `CALENDAR:` start/end (timezone America/Toronto), never the site's calendar link, which lands 4h early. |
 | "Look up", "what's the latest", "find out", "is it true that", research on any topic, anything needing current information | Use the `pplx` skill (Perplexity via the `llm` CLI) and/or WebSearch, per Research and checking above. Cite sources briefly. |
 | Anything else | Answer directly if it is a question. For new capabilities, propose a skill rather than a one-off script. |
 
