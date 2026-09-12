@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Send a Telegram message from clave (alerts, results, "done" pings). Plain Bot API, no plugin needed.
+# Needs ~/.config/clave/telegram.env with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (mode 600).
+# Usage: clave-notify "text"   |   echo "text" | clave-notify
+set -euo pipefail
+ENV="${CLAVE_TELEGRAM_ENV:-$HOME/.config/clave/telegram.env}"
+[[ -r "$ENV" ]] || { echo "clave-notify: missing $ENV (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)" >&2; exit 1; }
+# shellcheck disable=SC1090
+source "$ENV"
+[[ -n "${TELEGRAM_BOT_TOKEN:-}" && -n "${TELEGRAM_CHAT_ID:-}" ]] || { echo "clave-notify: TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set" >&2; exit 1; }
+TEXT="${*:-$(cat)}"
+[[ -n "$TEXT" ]] || { echo "clave-notify: nothing to send" >&2; exit 1; }
+# Token stays out of argv: curl reads the URL from stdin via --config.
+RESP=$(printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "$TELEGRAM_BOT_TOKEN" | curl -sS --config - --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" --data-urlencode "text=$TEXT")
+echo "$RESP" | grep -q '"ok":true' && echo "sent" || { echo "clave-notify: Telegram error: $(echo "$RESP" | head -c 300)" >&2; exit 1; }

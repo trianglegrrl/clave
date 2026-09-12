@@ -30,6 +30,7 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 - **One MyMusicStaff operation at a time.** The scripts hold a lock; do not try to parallelize them. Use the bulk script for many rows.
 - **Delegate long work to a subagent** so the hub stays responsive to the next message. Report back in one or two sentences.
 - **Replies are read on a phone.** Lead with the result, no headers, no code unless asked.
+- When work came in as an event (not a chat message), report the result with `bin/clave-notify`, since nobody is watching the terminal.
 - If a script exits with `OTP_REQUIRED`, fetch the code from Gmail as the skill describes. If it exits with `LOGIN_NEEDS_HUMAN`, say so and stop; the visible-browser login needs Alaina at the Mac.
 
 ## Events and schedules
@@ -44,6 +45,7 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 
 - `bin/clave-start` — start or reattach the hub (tmux + caffeinate + Remote Control).
 - `bin/clave-send` — drop an event for the loop; `LOOP.md` — what the loop does each tick.
+- `bin/clave-notify "text"` — send Alaina a Telegram message. Use it for results of events and for anything she should see without asking (a failed login, a finished backfill). Keep it to a sentence or two.
 - `events/` — `pending/` (unclaimed), `done/`, `failed/`.
 - `dashboards/` — one folder per dashboard: `template.html`, `build.sh`, generated output (gitignored).
 - `inbox/` — drop files here for the hub to act on (screenshots, CSVs); mention the filename in your message.

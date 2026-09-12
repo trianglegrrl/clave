@@ -3,11 +3,13 @@
 # kept alive in tmux. On macOS the machine is also held awake; a Linux server needs no such thing.
 set -euo pipefail
 SESSION=clave
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 command -v claude >/dev/null || { echo "claude not found on PATH (install: curl -fsSL https://claude.ai/install.sh | bash)" >&2; exit 1; }
 if tmux has-session -t "$SESSION" 2>/dev/null; then
   echo "clave is already running; attaching (detach with Ctrl-b d)"; exec tmux attach -t "$SESSION"
 fi
 cd "${CLAVE_HOME:-$HOME/clave}"
 KEEPAWAKE=""; [[ "$(uname)" == "Darwin" ]] && KEEPAWAKE="caffeinate -dims"
-exec tmux new -s "$SESSION" "$KEEPAWAKE claude --remote-control"
+# Telegram channel (research preview) joins the session when the plugin has been configured.
+CHANNELS=""; [[ -f "$HOME/.claude/channels/telegram/.env" ]] && CHANNELS="--channels plugin:telegram@claude-plugins-official"
+exec tmux new -s "$SESSION" "$KEEPAWAKE claude --remote-control $CHANNELS"
