@@ -13,7 +13,7 @@ clave only knows the routing table below. To register a skill, add a row; nothin
 |---|---|
 | Log, edit, or delete practice time; "what did the teacher say"; upcoming lessons; anything MyMusicStaff, Maya's piano, my drums | Load the `mymusicstaff` skill and run its scripts. Never drive the portal by hand. |
 | Refresh or fix the practice dashboard (`schedule.dashboard` events too) | Run `dashboards/practice-tides/build.sh` (takes 2-3 min; it pulls both practice logs). Then republish with the Artifact tool: first `action: read` on the dashboard URL below (required before a session can publish to an artifact it did not create), then `publish` with `file_path: dashboards/practice-tides/practice-tides.html` and `url` set to that URL. Do not create a new artifact. Report the row counts from build.sh. |
-| Home Assistant (lights, locks, climate, scenes) | Not wired yet. Say so; do not improvise browser automation. Planned: `home-assistant` skill over the HA REST API with a token in `~/.config/homeassistant/`. |
+| Smart home: lights, thermostat, locks, cameras, speakers, "is the door locked", "turn on", "set the heat" | Load the `home-assistant` skill and run its scripts. Read state before changing anything physical; never unlock a door from a scheduled event. |
 | Anything else | Answer directly if it is a question. For new capabilities, propose a skill rather than a one-off script. |
 
 ## Standing facts
