@@ -23,8 +23,8 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
   log "stale session found; killing it"; tmux kill-session -t "$SESSION" || true; sleep 2
 fi
 # A killed hub can leave its Telegram poller behind; two pollers on one bot steal each other's messages.
-if pgrep -u "$USER" -f "claude-plugins-official/telegram" >/dev/null; then
-  log "killing orphaned Telegram channel process(es)"; pkill -u "$USER" -f "claude-plugins-official/telegram" || true; sleep 1
+if pgrep -u "$USER" -f "^bun run --cwd .*claude-plugins-official/telegram" >/dev/null; then
+  log "killing orphaned Telegram channel process(es)"; pkill -u "$USER" -f "^bun run --cwd .*claude-plugins-official/telegram" || true; sleep 1
 fi
 
 cd "$CLAVE_HOME"
@@ -45,7 +45,7 @@ channel_alive() {
   [[ -z "$CHANNELS" ]] && return 0                       # no channel configured: nothing to watch
   local root p; root=$(pane_pid) || return 1
   [[ -n "$root" ]] || return 1
-  for p in $(pgrep -u "$USER" -f "claude-plugins-official/telegram"); do
+  for p in $(pgrep -u "$USER" -f "^bun run --cwd .*claude-plugins-official/telegram"); do
     descends_from "$p" "$root" && return 0
   done
   return 1

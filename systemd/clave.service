@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 ExecStart=%h/clave/bin/clave-hub
 ExecStopPost=-/usr/bin/tmux kill-session -t clave
-ExecStopPost=-/usr/bin/pkill -u %u -f claude-plugins-official/telegram
+ExecStopPost=-/usr/bin/pkill -u %u -f '^bun run --cwd .*claude-plugins-official/telegram'
 Restart=always
 RestartSec=15
 Environment=CLAVE_HOME=%h/clave
