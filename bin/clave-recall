@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Search clave's memory. Prints each matching file's name, description, and the matching lines.
+# Usage: clave-recall <word or regex> [more terms...]   (all terms must match, case-insensitive)
+#        clave-recall --all                             (list every memory with its description)
+set -euo pipefail
+CLAVE_HOME="${CLAVE_HOME:-$HOME/clave}"
+DIR="$CLAVE_HOME/memory"
+[[ -d "$DIR" ]] || { echo "no memory yet ($DIR)"; exit 0; }
+if [[ "${1:-}" == "--all" ]]; then
+  for f in "$DIR"/*.md; do
+    [[ "$(basename "$f")" == "MEMORY.md" || "$(basename "$f")" == "README.md" ]] && continue
+    printf '%s — %s\n' "$(basename "$f" .md)" "$(sed -n 's/^description: //p' "$f" | head -1)"
+  done
+  exit 0
+fi
+[[ $# -gt 0 ]] || { echo "clave-recall: give at least one search term (or --all)" >&2; exit 1; }
+hits=0
+for f in "$DIR"/*.md; do
+  base="$(basename "$f")"
+  [[ "$base" == "MEMORY.md" || "$base" == "README.md" ]] && continue
+  ok=1
+  for term in "$@"; do grep -q -i -E -- "$term" "$f" || { ok=0; break; }; done
+  [[ $ok -eq 1 ]] || continue
+  hits=$((hits + 1))
+  printf '## %s — %s (%s)\n' "$(basename "$f" .md)" "$(sed -n 's/^description: //p' "$f" | head -1)" "$(sed -n 's/^updated: //p' "$f" | head -1)"
+  awk 'f; /^---$/ && NR>1 {f=1}' "$f" | grep -i -E -- "$1" | head -6 | sed 's/^/  /'
+done
+[[ $hits -gt 0 ]] || echo "nothing in memory matches: $*"

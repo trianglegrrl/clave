@@ -40,6 +40,14 @@ tmux attach -t clave   # watch it; Ctrl-b d to detach
 
 The service enters the loop by itself after each (re)start.
 
+## Memory and research
+
+The hub keeps what it learns about me in `memory/`, one fact per file with a `MEMORY.md` index:
+`bin/clave-remember` writes, `bin/clave-recall` searches, and the rules in `CLAUDE.md` say when to do
+each (read before answering about me, write when I tell it something). It looks things up with the
+`pplx` skill (Perplexity through the `llm` CLI) or web search rather than trusting its own recall,
+and it re-checks anything I'm about to act on.
+
 ## Caveats
 
 This is a personal setup, not a product. The event loop is a polling loop on purpose--it's
