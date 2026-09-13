@@ -3,3 +3,5 @@ dashboards/*/list-*.json
 state/
 inbox/
 .DS_Store
+memory/*
+!memory/README.md

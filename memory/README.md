@@ -4,3 +4,5 @@ One fact per file, written by the hub as it learns things about Alaina, her fami
 and ongoing plans. `MEMORY.md` is the index (one line per file). Search with `bin/clave-recall`, write
 with `bin/clave-remember` (re-using a name updates the file). Frontmatter: `name`, `description`,
 `type` (user, preference, fact, project, reference), `updated`. No credentials, ever.
+
+The facts themselves are gitignored and stay on this machine; only this README is tracked.

@@ -30,7 +30,8 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
   line offering the obvious next step if there is one.
 - **What not to store:** credentials (the tool refuses them), anything the code or git already records,
   one-off chit-chat. Facts, not transcripts.
-- Memory is part of this repo, so commit it with the events you archive (`git add memory events && git commit`).
+- Memory is private and gitignored (only `memory/README.md` is tracked). Never commit or push memory files;
+  commit only events when you archive them (`git add events && git commit`).
 
 ## Research and checking
 
@@ -93,5 +94,5 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
 - `events/` — `pending/` (unclaimed), `done/`, `failed/`.
 - `dashboards/` — one folder per dashboard: `template.html`, `build.sh`, generated output (gitignored).
 - `inbox/` — drop files here for the hub to act on (screenshots, CSVs); mention the filename in your message.
-- `memory/` — what you know about Alaina and her world, one fact per file, `MEMORY.md` index.
+- `memory/` — what you know about Alaina and her world, one fact per file, `MEMORY.md` index. Gitignored; never committed.
 - `state/` — small durable scratch the hub keeps between restarts (never facts about people; those go in `memory/`).
