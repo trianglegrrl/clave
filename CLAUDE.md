@@ -63,6 +63,7 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
 - Students on the MMS account: `maya` and `me` (alias for Alaina, set in `~/.config/mymusicstaff/config.env`).
 - Practice dashboard artifact: https://claude.ai/code/artifact/f6175090-76c5-473e-8a59-48949308dd66 (pass it as `url` when republishing).
 - Timing tracker artifact: https://claude.ai/code/artifact/1a0aac6b-38cf-4bc2-8d5e-42b81e7ee998 (pass it as `url` when republishing). Takes and generated output are gitignored, so the MIDI files live only in `dashboards/timing-tracker/takes/` on this machine.
+- Drum Mac (SD3 and the eDRUMin 8, MIDI port "eDrumIn BLACK"): `ssh fragglerock@drumz.local` (192.168.2.250 when checked 2026-09-15); drumrec lives at `~/drumrec`. Its internal disk is nearly full; the external `Backup` drive is exFAT, fine for recordings but not for apps or Python venvs.
 - Lesson days count as 30 minutes of practice for Maya. Rehearsal bookings at Geary Ave count as practice for Alaina at the booking length; confirmations come from info@gearyaverehearsal.com.
 - Skills are installed globally under `~/.claude/skills/`; they work from any directory, so never `cd` to use one.
 
@@ -94,6 +95,7 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
 - `bin/clave-remember` / `bin/clave-recall` — write and search `memory/` (see Memory above).
 - `bin/clave-notify "text"` — send Alaina a Telegram message. Use it for results of events and for anything she should see without asking (a failed login, a finished backfill). Keep it to a sentence or two.
 - `events/` — `pending/` (unclaimed), `done/`, `failed/`.
+- `tools/drumrec/` — MIDI practice recorder with a click track; runs on the drum Mac (see its README). `bin/clave-pull-takes` copies new takes into `recordings/drumz/` (gitignored).
 - `dashboards/` — one folder per dashboard: `template.html`, `build.sh`, generated output (gitignored).
 - `inbox/` — drop files here for the hub to act on (screenshots, CSVs); mention the filename in your message.
 - `memory/` — what you know about Alaina and her world, one fact per file, `MEMORY.md` index. Gitignored; never committed.
