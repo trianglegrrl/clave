@@ -2,7 +2,8 @@
 """Rebuild dashboards/timing-tracker/timing-tracker.html from every takes/*.mid.
 
 Each take is a benchmark MIDI recording named YYYY-MM-DD-label.mid (Superior Drummer 3
-via eDRUMin). Claude republishes the output with the Artifact tool using the URL in CLAUDE.md.
+via eDRUMin, or a tools/drumrec take: type 1, click notes on channel 10 in the "drumrec click"
+track, which are skipped). Claude republishes the output with the Artifact tool using the URL in CLAUDE.md.
 """
 import json, re, statistics as st, sys, pathlib
 import mido
@@ -21,13 +22,16 @@ def load(path):
     ppq = mid.ticks_per_beat
     tempo = None
     hits = {}  # note -> [(tick, vel)]
-    for track in mid.tracks:
+    for track in mid.tracks:  # type 0 or 1: tracks are merged by absolute tick
         t = 0
+        click = track.name == "drumrec click"  # drumrec takes: click notes are not hits
         for msg in track:
             t += msg.time
             if msg.type == "set_tempo" and tempo is None:
                 tempo = msg.tempo
             elif msg.type == "note_on" and msg.velocity > 0:
+                if click or (msg.channel == 9 and msg.note in (76, 77)):
+                    continue
                 hits.setdefault(msg.note, []).append((t, msg.velocity))
     tempo = tempo or 500000
     return ppq, tempo, {n: sorted(v) for n, v in hits.items()}

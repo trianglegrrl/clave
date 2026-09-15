@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Pull new drumrec takes (*.mid + *.json) from the drum Mac into recordings/drumz/.
+# Idempotent: files already here with the same size and mtime are skipped. Prints what it pulled.
+set -euo pipefail
+host=${DRUMREC_HOST:-fragglerock@drumz.local}
+dest="$(cd "$(dirname "$0")/.." && pwd)/recordings/drumz"
+mkdir -p "$dest"
+# the Mac ships rsync 2.6.9: stick to old flags (-t keeps mtimes so reruns skip unchanged files)
+out=$(rsync -rt --out-format='%n' -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' \
+  --include='*.mid' --include='*.json' --exclude='*' \
+  "$host:drumrec/takes/" "$dest/")
+out=$(printf '%s\n' "$out" | grep -v '/$' | grep -v '^\.\?$' || true)
+if [ -z "$out" ]; then
+  echo "no new takes (recordings/drumz has $(ls "$dest"/*.mid 2>/dev/null | wc -l | tr -d ' ') take(s))"
+else
+  echo "pulled into $dest:"
+  printf '  %s\n' $out
+fi

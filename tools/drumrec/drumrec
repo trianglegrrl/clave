@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run drumrec with its venv: ~/drumrec/drumrec <command> ...
+here=$(cd "$(dirname "$0")" && pwd)
+exec "$here/.venv/bin/python3" "$here/drumrec.py" "$@"

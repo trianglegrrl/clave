@@ -9,3 +9,4 @@ dashboards/timing-tracker/takes/
 dashboards/timing-tracker/timing-tracker.html
 dashboards/timing-tracker/timing-data.json
 __pycache__/
+recordings/
