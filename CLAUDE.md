@@ -80,7 +80,7 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
 ## Events and schedules
 
 - `bin/clave-send "text"` drops an event; `LOOP.md` is the polling loop that drains them.
-  Start it once per session: `/loop 5m read LOOP.md and process the event inbox`.
+  Start it once per session: `/loop 1h read LOOP.md and process the event inbox`.
 - Schedules are events too, but there is no nightly dashboard rebuild any more: the dashboard
   is rebuilt right after each MyMusicStaff write, so it is never more than one edit stale.
   `clave-send --type schedule.dashboard "rebuild the practice dashboard"` still forces one by hand.

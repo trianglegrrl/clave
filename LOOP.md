@@ -1,6 +1,6 @@
 # clave event loop
 
-Run inside the hub session, once, after starting: `/loop 5m read LOOP.md and process the event inbox`
+Run inside the hub session, once, after starting: `/loop 1h read LOOP.md and process the event inbox`
 
 On each tick:
 1. List `events/pending/*.md` sorted by name (names start with a timestamp). Nothing there: stop, say nothing.

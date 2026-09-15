@@ -6,7 +6,7 @@
 set -euo pipefail
 SESSION=clave
 CLAVE_HOME="${CLAVE_HOME:-$HOME/clave}"
-LOOP_PROMPT="/loop 5m read LOOP.md and process the event inbox"
+LOOP_PROMPT="/loop 1h read LOOP.md and process the event inbox"
 READY_TIMEOUT=120      # seconds to wait for Remote Control to come up
 CHANNEL_GRACE=3        # consecutive checks without the Telegram process before restarting
 CHECK_EVERY=30         # seconds between health checks
