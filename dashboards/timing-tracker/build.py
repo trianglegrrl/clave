@@ -2,7 +2,7 @@
 """Rebuild dashboards/timing-tracker/timing-tracker.html from every takes/*.mid.
 
 Each take is a benchmark MIDI recording named YYYY-MM-DD-label.mid (Superior Drummer 3
-via eDRUMin, or a tools/drumrec take: type 1, click notes on channel 10 in the "drumrec click"
+via eDRUMin, or a drumrec take (github.com/trianglegrrl/drumrec): type 1, click notes on channel 10 in the "drumrec click"
 track, which are skipped). Claude republishes the output with the Artifact tool using the URL in CLAUDE.md.
 """
 import json, re, statistics as st, sys, pathlib

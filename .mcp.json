@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "drumrec": {
+      "type": "stdio",
+      "command": "/home/a/.local/bin/uv",
+      "args": [
+        "run",
+        "--project",
+        "/home/a/drumrec",
+        "drumrec-mcp"
+      ],
+      "env": {}
+    }
+  }
+}
