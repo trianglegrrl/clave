@@ -1,6 +1,6 @@
 # clave
 
-Hey folks. This is my always-on assistant: one Claude Code session that lives on my Mac,
+This is my always-on assistant: one Claude Code session that lives on my Mac,
 answers texts from my phone, and does the boring bits for me (logging practice time for me
 and my kid, rebuilding a dashboard every night, eventually poking Home Assistant). It's named
 for the clave--the rhythm everything else in the band locks to--because that's the job.
@@ -24,7 +24,7 @@ for the clave--the rhythm everything else in the band locks to--because that's t
 ```
 ~/clave/bin/clave-start
 # then, once, inside the session:
-/loop 5m read LOOP.md and process the event inbox
+/loop 1h read LOOP.md and process the event inbox
 ```
 
 The Mac has to stay awake (that's the `caffeinate`). Locked is fine.
@@ -52,5 +52,4 @@ and it re-checks anything I'm about to act on.
 
 This is a personal setup, not a product. The event loop is a polling loop on purpose--it's
 simple and I can see every event as a file--and I haven't stress-tested any of it beyond my
-own two or three messages a day. Happy to answer questions if you're building something
-similar. :)
+own handful messages a day. 
