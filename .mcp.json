@@ -10,6 +10,16 @@
         "drumrec-mcp"
       ],
       "env": {}
+    },
+    "slack": {
+      "type": "stdio",
+      "command": "/home/a/.bun/bin/bun",
+      "args": [
+        "/home/a/clave/channel/slack-channel.ts"
+      ],
+      "env": {
+        "SLACK_ALLOWED_USERS": "U0CA8KN4XPX"
+      }
     }
   }
 }

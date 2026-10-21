@@ -91,10 +91,12 @@ how she likes things done live in `memory/` as one file per fact, indexed in `me
 ## Layout
 
 - `bin/clave-start` — start or reattach the hub (tmux + caffeinate + Remote Control). On razorback it just starts the systemd service.
-- `bin/clave-hub` + `systemd/clave.service` — supervisor used on razorback: starts the hub, enters the loop, restarts the whole thing if the session or the Telegram channel process dies (`systemctl --user status clave`, `journalctl --user -u clave`).
+- `bin/clave-hub` + `systemd/clave.service` — supervisor used on razorback: starts the hub, enters the loop, restarts the whole thing if the session or a channel process (Telegram, Slack) dies (`systemctl --user status clave`, `journalctl --user -u clave`).
 - `bin/clave-send` — drop an event for the loop; `LOOP.md` — what the loop does each tick.
 - `bin/clave-remember` / `bin/clave-recall` — write and search `memory/` (see Memory above).
 - `bin/clave-notify "text"` — send Alaina a Telegram message. Use it for results of events and for anything she should see without asking (a failed login, a finished backfill). Keep it to a sentence or two.
+- `bin/clave-slack "text"` — post to Alaina's #clave Slack channel (Clave Slack app, tokens in `.env`). Same use as clave-notify; use whichever channel she last wrote from, Telegram if unsure.
+- `channel/slack-channel.ts` — the Slack channel: #clave messages from Alaina arrive as `<channel source="slack" ...>`; answer with the slack `reply` tool, passing `thread_ts`. Adapted from Belvedere's (`~/family-food`); separate Slack app, so the two never share a connection.
 - `events/` — `pending/` (unclaimed), `done/`, `failed/`.
 - drumrec — MIDI practice recorder (daemon, TUI, MCP server) in its own private repo, github.com/trianglegrrl/drumrec; local checkout `/home/a/drumrec`, deployed on the drum Mac at `~/drumrec` (launchd agent `com.trianglegrrl.drumrec`). MCP server "drumrec" is registered in `.mcp.json`. `bin/clave-pull-takes` copies new takes into `recordings/drumz/` (gitignored).
 - `dashboards/` — one folder per dashboard: `template.html`, `build.sh`, generated output (gitignored).

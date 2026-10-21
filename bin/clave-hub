@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Foreground supervisor for the clave hub, meant to run under systemd (see systemd/clave.service).
 # Starts Claude Code in a tmux session, enters the inbox loop once the session is ready, then
-# watches it: if the session dies, or the Telegram channel subprocess disappears, exit so
+# watches it: if the session dies, or a chat channel subprocess (Telegram, Slack) disappears, exit so
 # systemd restarts everything. Attach any time with: tmux attach -t clave
 set -euo pipefail
 SESSION=clave
 CLAVE_HOME="${CLAVE_HOME:-$HOME/clave}"
 LOOP_PROMPT="/loop 1h read LOOP.md and process the event inbox"
 READY_TIMEOUT=120      # seconds to wait for Remote Control to come up
-CHANNEL_GRACE=3        # consecutive checks without the Telegram process before restarting
+CHANNEL_GRACE=3        # consecutive checks without a channel process before restarting
 CHECK_EVERY=30         # seconds between health checks
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 
@@ -16,16 +16,27 @@ log() { printf '%s clave-hub: %s\n' "$(date '+%F %T')" "$*"; }
 command -v claude >/dev/null || { log "claude not found on PATH"; exit 1; }
 command -v tmux >/dev/null || { log "tmux not found"; exit 1; }
 
-CHANNELS=""
-[[ -f "$HOME/.claude/channels/telegram/.env" ]] && CHANNELS="--channels plugin:telegram@claude-plugins-official"
+TELEGRAM_PATTERN="^bun run --cwd .*claude-plugins-official/telegram"
+SLACK_PATTERN="bun $CLAVE_HOME/channel/slack-channel[.]ts"   # absolute path, so Belvedere's ./channel copy never matches
+CHANNELS=""; WATCH=()
+if [[ -f "$HOME/.claude/channels/telegram/.env" ]]; then
+  CHANNELS="--channels plugin:telegram@claude-plugins-official"; WATCH+=("$TELEGRAM_PATTERN")
+fi
+# Slack (#clave) is a custom channel, so it loads as a development channel (see channel/slack-channel.ts).
+if [[ -f "$CLAVE_HOME/.env" && -d "$CLAVE_HOME/channel/node_modules" ]]; then
+  CHANNELS="$CHANNELS --dangerously-load-development-channels server:slack"; WATCH+=("$SLACK_PATTERN")
+fi
 
 if tmux has-session -t "$SESSION" 2>/dev/null; then
   log "stale session found; killing it"; tmux kill-session -t "$SESSION" || true; sleep 2
 fi
 # A killed hub can leave its Telegram poller behind; two pollers on one bot steal each other's messages.
-if pgrep -u "$USER" -f "^bun run --cwd .*claude-plugins-official/telegram" >/dev/null; then
-  log "killing orphaned Telegram channel process(es)"; pkill -u "$USER" -f "^bun run --cwd .*claude-plugins-official/telegram" || true; sleep 1
-fi
+# Same for Slack: two Socket Mode connections split incoming messages between them.
+for pat in "$TELEGRAM_PATTERN" "$SLACK_PATTERN"; do
+  if pgrep -u "$USER" -f "$pat" >/dev/null; then
+    log "killing orphaned channel process(es): $pat"; pkill -u "$USER" -f "$pat" || true; sleep 1
+  fi
+done
 
 cd "$CLAVE_HOME"
 tmux new -d -s "$SESSION" -x 200 -y 50 "claude --remote-control $CHANNELS"
@@ -41,20 +52,28 @@ descends_from() {  # descends_from <pid> <ancestor>: is <ancestor> somewhere up 
   done
   return 1
 }
-channel_alive() {
-  [[ -z "$CHANNELS" ]] && return 0                       # no channel configured: nothing to watch
+proc_alive() {  # proc_alive <pattern>: is a matching process running under this session's pane?
   local root p; root=$(pane_pid) || return 1
   [[ -n "$root" ]] || return 1
-  for p in $(pgrep -u "$USER" -f "^bun run --cwd .*claude-plugins-official/telegram"); do
+  for p in $(pgrep -u "$USER" -f "$1"); do
     descends_from "$p" "$root" && return 0
   done
   return 1
+}
+channel_alive() {  # every configured channel must be up (none configured: nothing to watch)
+  local pat
+  for pat in "${WATCH[@]}"; do proc_alive "$pat" || return 1; done
+  return 0
 }
 
 # Wait for the session to be ready, then enter the polling loop.
 deadline=$(( $(date +%s) + READY_TIMEOUT ))
 until pane | grep -q "remote-control is active"; do
   if ! tmux has-session -t "$SESSION" 2>/dev/null; then log "session died during startup"; exit 1; fi
+  # The development-channel warning returns on every launch; accept it so restarts stay unattended.
+  if pane | grep -q "WARNING: Loading development channels"; then
+    log "accepting development-channel warning"; tmux send-keys -t "$SESSION" Enter; sleep 5
+  fi
   if (( $(date +%s) > deadline )); then log "Remote Control not ready after ${READY_TIMEOUT}s; restarting"; tmux kill-session -t "$SESSION" || true; exit 1; fi
   sleep 3
 done
@@ -69,7 +88,7 @@ while sleep "$CHECK_EVERY"; do
   if channel_alive; then
     missing=0
   else
-    missing=$((missing + 1)); log "Telegram channel process missing ($missing/$CHANNEL_GRACE)"
+    missing=$((missing + 1)); log "channel process missing ($missing/$CHANNEL_GRACE)"
     if (( missing >= CHANNEL_GRACE )); then
       log "channel stayed dead; restarting hub"; tmux kill-session -t "$SESSION" || true; exit 1
     fi

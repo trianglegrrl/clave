@@ -1,5 +1,5 @@
 [Unit]
-Description=clave hub (Claude Code with Remote Control and Telegram, in tmux)
+Description=clave hub (Claude Code with Remote Control, Telegram and Slack, in tmux)
 After=network-online.target
 Wants=network-online.target
 
@@ -8,6 +8,7 @@ Type=simple
 ExecStart=%h/clave/bin/clave-hub
 ExecStopPost=-/usr/bin/tmux kill-session -t clave
 ExecStopPost=-/usr/bin/pkill -u %u -f '^bun run --cwd .*claude-plugins-official/telegram'
+ExecStopPost=-/usr/bin/pkill -u %u -f 'bun %h/clave/channel/slack-channel[.]ts'
 Restart=always
 RestartSec=15
 Environment=CLAVE_HOME=%h/clave

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Post a message to Alaina's #clave Slack channel (alerts, results, "done" pings). Plain Web API, no session needed.
+# Needs ~/clave/.env with SLACK_BOT_TOKEN and SLACK_CHANNEL_ID (mode 600; the Clave Slack app).
+# Usage: clave-slack "text"   |   echo "text" | clave-slack
+set -euo pipefail
+ENV="${CLAVE_HOME:-$HOME/clave}/.env"
+[[ -r "$ENV" ]] || { echo "clave-slack: missing $ENV (SLACK_BOT_TOKEN, SLACK_CHANNEL_ID)" >&2; exit 1; }
+# shellcheck disable=SC1090
+set -a; source "$ENV"; set +a
+[[ -n "${SLACK_BOT_TOKEN:-}" && -n "${SLACK_CHANNEL_ID:-}" ]] || { echo "clave-slack: SLACK_BOT_TOKEN / SLACK_CHANNEL_ID not set" >&2; exit 1; }
+TEXT="${*:-$(cat)}"
+[[ -n "$TEXT" ]] || { echo "clave-slack: nothing to send" >&2; exit 1; }
+# Token stays out of argv: curl reads the auth header from stdin via --config.
+RESP=$(printf 'header = "Authorization: Bearer %s"\n' "$SLACK_BOT_TOKEN" | curl -sS --config - https://slack.com/api/chat.postMessage \
+  --data-urlencode "channel=$SLACK_CHANNEL_ID" --data-urlencode "text=$TEXT")
+echo "$RESP" | grep -q '"ok":true' && echo "sent" || { echo "clave-slack: Slack error: $(echo "$RESP" | head -c 300)" >&2; exit 1; }
