@@ -3,9 +3,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.0",
-    "@slack/socket-mode": "^2.0.4",
-    "@slack/web-api": "^7.9.3",
-    "zod": "^3.25.0"
+    "claude-slack-channel": "git+ssh://git@github.com/trianglegrrl/claude-slack-channel.git#v0.1.0"
   }
 }
