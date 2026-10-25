@@ -1,0 +1,25 @@
+#!/bin/sh
+# Refuses a commit that would add a secret. Turn it on once per clone:
+#   git config core.hooksPath .githooks
+
+# .env files hold tokens, whatever they're named (.env.bak, .env.local); only .env.example may be committed.
+envs=$(git diff --cached --name-only --diff-filter=ACR | grep -E '(^|/)\.env' | grep -vE '(^|/)\.env\.example$')
+if [ -n "$envs" ]; then
+  echo "pre-commit: not committing env files, which hold secrets:" >&2
+  echo "$envs" | sed 's/^/  /' >&2
+  echo "Unstage them (git restore --staged <file>) and commit again." >&2
+  exit 1
+fi
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks isn't installed, so this commit can't be checked for secrets." >&2
+  echo "Install it (brew install gitleaks, or the release binary from github.com/gitleaks/gitleaks) and commit again." >&2
+  exit 1
+fi
+
+# Scans only what's staged. --redact keeps any secret it finds out of the terminal.
+if ! gitleaks git --pre-commit --staged --redact --no-banner --log-level warn; then
+  echo "pre-commit: gitleaks found what looks like a secret in the staged changes (shown redacted above)." >&2
+  echo "Move it to .env and commit again. If it's a false positive, add its fingerprint to .gitleaksignore." >&2
+  exit 1
+fi
